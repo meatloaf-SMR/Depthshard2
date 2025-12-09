@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>D&D Control Center</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <h1>D&D Control Center</h1>
+      <div class="header-right">
+        <span id="campaign-name-display">Campaign: <strong>My Campaign</strong></span>
+        <button id="edit-campaign-btn" class="btn btn-ghost">Edit</button>
+      </div>
+    </header>
+
+    <nav class="tab-bar">
+      <button class="tab-button active" data-tab="characters">Characters</button>
+      <button class="tab-button" data-tab="dice">Dice Roller</button>
+      <button class="tab-button" data-tab="initiative">Initiative</button>
+      <button class="tab-button" data-tab="notes">Notes & World</button>
+      <button class="tab-button" data-tab="settings">Settings</button>
+    </nav>
+
+    <main class="tab-container">
+      <!-- CHARACTERS TAB -->
+      <section class="tab-content active" id="tab-characters">
+        <div class="tab-header-row">
+          <h2>Characters</h2>
+          <button id="add-character-btn" class="btn btn-primary">+ New Character</button>
+        </div>
+        <div id="character-list" class="character-list"></div>
+        <div id="character-detail" class="character-detail hidden"></div>
+      </section>
+
+      <!-- DICE TAB -->
+      <section class="tab-content" id="tab-dice">
+        <div class="tab-header-row">
+          <h2>Dice Roller</h2>
+        </div>
+        <div class="dice-layout">
+          <div class="dice-left">
+            <div class="dice-row">
+              <button class="dice-btn" data-die="4">d4</button>
+              <button class="dice-btn" data-die="6">d6</button>
+              <button class="dice-btn" data-die="8">d8</button>
+              <button class="dice-btn" data-die="10">d10</button>
+              <button class="dice-btn" data-die="12">d12</button>
+              <button class="dice-btn" data-die="20">d20</button>
+            </div>
+            <div class="dice-row">
+              <label class="field-inline">
+                <span>Custom: </span>
+                <input type="number" id="custom-die-input" min="2" max="100" value="100" />
+              </label>
+              <button id="roll-custom-die-btn" class="btn btn-secondary">Roll dX</button>
+            </div>
+            <div class="dice-row">
+              <label class="field-inline">
+                <span>Count: </span>
+                <input type="number" id="dice-count-input" min="1" max="20" value="1" />
+              </label>
+              <label class="field-inline">
+                <span>Modifier: </span>
+                <input type="number" id="dice-mod-input" value="0" />
+              </label>
+            </div>
+            <div class="dice-row">
+              <button id="roll-adv-btn" class="btn btn-tertiary">Roll d20 (Advantage)</button>
+              <button id="roll-dis-btn" class="btn btn-tertiary">Roll d20 (Disadvantage)</button>
+            </div>
+          </div>
+          <div class="dice-right">
+            <h3>Results</h3>
+            <div id="dice-result-main" class="dice-result-main">Roll some dice!</div>
+            <div id="dice-result-detail" class="dice-result-detail"></div>
+            <h4>History</h4>
+            <div id="dice-history" class="dice-history"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- INITIATIVE TAB -->
+      <section class="tab-content" id="tab-initiative">
+        <div class="tab-header-row">
+          <h2>Initiative Tracker</h2>
+          <div class="initiative-controls">
+            <button id="add-combatant-btn" class="btn btn-primary">+ Add Combatant</button>
+            <button id="clear-initiative-btn" class="btn btn-danger">Clear</button>
+          </div>
+        </div>
+        <div class="initiative-layout">
+          <div class="initiative-form">
+            <h3>Add / Edit Combatant</h3>
+            <label class="field">
+              <span>Name</span>
+              <input type="text" id="combatant-name-input" placeholder="Grog, Goblin #1..." />
+            </label>
+            <label class="field">
+              <span>Initiative</span>
+              <input type="number" id="combatant-init-input" placeholder="15" />
+            </label>
+            <label class="field">
+              <span>HP</span>
+              <input type="number" id="combatant-hp-input" placeholder="27" />
+            </label>
+            <label class="field">
+              <span>Type</span>
+              <select id="combatant-type-input">
+                <option value="pc">PC</option>
+                <option value="npc">NPC</option>
+                <option value="enemy">Enemy</option>
+              </select>
+            </label>
+            <button id="save-combatant-btn" class="btn btn-primary">Save Combatant</button>
+            <button id="reset-combatant-form-btn" class="btn btn-ghost">Reset Form</button>
+          </div>
+          <div class="initiative-list-container">
+            <h3>Turn Order</h3>
+            <div class="initiative-top-row">
+              <button id="sort-initiative-btn" class="btn btn-secondary">Sort by Initiative</button>
+              <button id="next-turn-btn" class="btn btn-tertiary">Next Turn</button>
+            </div>
+            <div id="round-display" class="round-display">Round: 1 | Current: -</div>
+            <div id="initiative-list" class="initiative-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- NOTES & WORLD TAB -->
+      <section class="tab-content" id="tab-notes">
+        <div class="tab-header-row">
+          <h2>Notes & World</h2>
+        </div>
+        <div class="notes-layout">
+          <div class="notes-column">
+            <h3>Session Notes</h3>
+            <textarea id="session-notes" class="notes-textarea" placeholder="Session log, important events, NPCs met..."></textarea>
+          </div>
+          <div class="notes-column">
+            <h3>World / Locations</h3>
+            <textarea id="world-notes" class="notes-textarea" placeholder="Towns, factions, quests, lore..."></textarea>
+          </div>
+          <div class="notes-column">
+            <h3>Quick Reference</h3>
+            <textarea id="rules-notes" class="notes-textarea" placeholder="House rules, conditions, reminders..."></textarea>
+          </div>
+        </div>
+        <div class="notes-footer">
+          <span class="muted">All notes automatically save to this browser.</span>
+        </div>
+      </section>
+
+      <!-- SETTINGS TAB -->
+      <section class="tab-content" id="tab-settings">
+        <h2>Settings</h2>
+        <div class="settings-section">
+          <h3>Campaign</h3>
+          <label class="field">
+            <span>Campaign name</span>
+            <input type="text" id="campaign-name-input" placeholder="My Campaign" />
+          </label>
+          <button id="save-campaign-name-btn" class="btn btn-primary">Save Campaign Name</button>
+        </div>
+
+        <div class="settings-section">
+          <h3>Data</h3>
+          <button id="export-data-btn" class="btn btn-secondary">Export Data</button>
+          <input type="file" id="import-data-input" accept=".json" class="file-input" />
+          <button id="import-data-btn" class="btn btn-secondary">Import Data</button>
+          <button id="reset-all-btn" class="btn btn-danger">Reset Everything</button>
+          <p class="muted">
+            Data is stored locally in your browser using localStorage. Export regularly if you care about backups.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>D&D Control Center</span>
+      <span class="muted">All local, no accounts, no servers.</span>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
