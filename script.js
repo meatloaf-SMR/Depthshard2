@@ -1,6 +1,6 @@
 // ----- DATA MODEL & STORAGE -----
 
-const STORAGE_KEY = "dnd_control_center_data_v1";
+const STORAGE_KEY = "dnd_control_center_data_v2";
 
 let state = {
   campaignName: "My Campaign",
@@ -16,7 +16,19 @@ let state = {
     world: "",
     rules: ""
   },
-  diceHistory: []
+  diceHistory: [],
+  solo: {
+    chaos: 5
+  },
+  aidm: {
+    chaos: 5,
+    world: {
+      tension: 1,
+      lastScene: "neutral",
+      npcs: [],
+      flags: []
+    }
+  }
 };
 
 function loadState() {
@@ -26,7 +38,19 @@ function loadState() {
     const parsed = JSON.parse(raw);
     state = {
       ...state,
-      ...parsed
+      ...parsed,
+      solo: { chaos: 5, ...(parsed.solo || {}) },
+      aidm: {
+        chaos: 5,
+        world: {
+          tension: 1,
+          lastScene: "neutral",
+          npcs: [],
+          flags: [],
+          ...(parsed.aidm?.world || {})
+        },
+        ...(parsed.aidm || {})
+      }
     };
   } catch (e) {
     console.error("Failed to load state", e);
@@ -56,6 +80,10 @@ document.addEventListener("DOMContentLoaded", () => {
   loadState();
   initTabs();
   bindGlobalControls();
+  initDiceControls();
+  initInitiativeControls();
+  initSoloMode();
+  initAIDM();
   renderAll();
 });
 
@@ -177,7 +205,19 @@ function bindGlobalControls() {
         world: "",
         rules: ""
       },
-      diceHistory: []
+      diceHistory: [],
+      solo: {
+        chaos: 5
+      },
+      aidm: {
+        chaos: 5,
+        world: {
+          tension: 1,
+          lastScene: "neutral",
+          npcs: [],
+          flags: []
+        }
+      }
     };
     saveState();
     renderAll();
@@ -210,12 +250,6 @@ function bindGlobalControls() {
   document
     .getElementById("add-character-btn")
     .addEventListener("click", () => onAddCharacter());
-
-  // Dice
-  initDiceControls();
-
-  // Initiative
-  initInitiativeControls();
 }
 
 // ----- RENDER ALL -----
@@ -225,6 +259,8 @@ function renderAll() {
   renderCharacterDetail();
   renderInitiative();
   renderDice();
+  renderSoloUI();
+  renderAIDMWorld();
 }
 
 // ----- CHARACTERS -----
@@ -1004,4 +1040,148 @@ function advanceTurn() {
   }
   saveState();
   renderInitiative();
+}
+
+// ----- SOLO MODE -----
+
+function initSoloMode() {
+  const chaosValueEl = document.getElementById("chaos-value");
+  const chaosUp = document.getElementById("chaos-up");
+  const chaosDown = document.getElementById("chaos-down");
+  const oracleBtn = document.getElementById("oracle-roll-btn");
+  const npcBtn = document.getElementById("npc-generate-btn");
+  const sceneBtn = document.getElementById("scene-generate-btn");
+
+  chaosValueEl.textContent = state.solo.chaos;
+
+  chaosUp.addEventListener("click", () => {
+    state.solo.chaos = Math.min(9, state.solo.chaos + 1);
+    chaosValueEl.textContent = state.solo.chaos;
+    saveState();
+  });
+
+  chaosDown.addEventListener("click", () => {
+    state.solo.chaos = Math.max(1, state.solo.chaos - 1);
+    chaosValueEl.textContent = state.solo.chaos;
+    saveState();
+  });
+
+  oracleBtn.addEventListener("click", () => {
+    const chaos = state.solo.chaos;
+    const roll = Math.floor(Math.random() * 100) + 1;
+    let result;
+
+    if (roll <= 10 + chaos * 2) result = "Yes, and...";
+    else if (roll <= 40 + chaos * 2) result = "Yes";
+    else if (roll <= 60) result = "Maybe";
+    else if (roll <= 90 - chaos * 2) result = "No";
+    else result = "No, but...";
+
+    document.getElementById("oracle-result").textContent = result;
+  });
+
+  npcBtn.addEventListener("click", () => {
+    const traits = ["grumpy", "cheerful", "nervous", "mysterious", "sarcastic"];
+    const goals = ["find a relic", "escape danger", "earn money", "hide a secret", "gain power"];
+    const quirks = ["talks too fast", "collects rocks", "hates magic", "laughs at bad times", "never blinks"];
+
+    const npc = `
+      Personality: ${traits[Math.floor(Math.random() * traits.length)]}<br>
+      Goal: ${goals[Math.floor(Math.random() * goals.length)]}<br>
+      Quirk: ${quirks[Math.floor(Math.random() * quirks.length)]}
+    `;
+
+    document.getElementById("npc-result").innerHTML = npc;
+  });
+
+  sceneBtn.addEventListener("click", () => {
+    const scenes = [
+      "A tense negotiation begins.",
+      "A hidden danger reveals itself.",
+      "Someone unexpected arrives.",
+      "A clue changes everything.",
+      "The environment becomes hostile."
+    ];
+    document.getElementById("scene-result").textContent =
+      scenes[Math.floor(Math.random() * scenes.length)];
+  });
+}
+
+function renderSoloUI() {
+  document.getElementById("chaos-value").textContent = state.solo.chaos;
+}
+
+// ----- AI DM ENGINE -----
+
+function initAIDM() {
+  const input = document.getElementById("aidm-input");
+  const output = document.getElementById("aidm-output");
+  const btn = document.getElementById("aidm-submit");
+
+  renderAIDMWorld();
+
+  btn.addEventListener("click", () => {
+    const action = input.value.trim();
+    if (!action) return;
+
+    const chaos = state.solo?.chaos || state.aidm.chaos || 5;
+    const tension = state.aidm.world.tension;
+
+    const positive = [
+      "You gain an unexpected advantage.",
+      "An NPC offers help.",
+      "You discover something valuable.",
+      "The situation turns in your favor.",
+      "A hidden opportunity reveals itself."
+    ];
+    const neutral = [
+      "The situation remains stable.",
+      "Nothing immediate happens.",
+      "You proceed cautiously.",
+      "You get a better sense of the area.",
+      "Things are quiet—for now."
+    ];
+    const negative = [
+      "Danger escalates.",
+      "You are put in a difficult position.",
+      "An enemy reacts aggressively.",
+      "You stumble into a complication.",
+      "The stakes suddenly get higher."
+    ];
+
+    const roll = Math.floor(Math.random() * 100) + 1;
+    let scene;
+
+    if (roll < 30 + chaos * 2 - tension * 5) scene = "positive";
+    else if (roll < 70) scene = "neutral";
+    else scene = "negative";
+
+    state.aidm.world.lastScene = scene;
+
+    if (scene === "positive") state.aidm.world.tension = Math.max(1, tension - 1);
+    if (scene === "negative") state.aidm.world.tension = Math.min(10, tension + 1);
+
+    const tables = { positive, neutral, negative };
+    const flavor = tables[scene][Math.floor(Math.random() * tables[scene].length)];
+
+    output.innerHTML = `
+      <strong>You do:</strong> ${action}<br><br>
+      <strong>DM:</strong> ${flavor}
+    `;
+
+    saveState();
+    renderAIDMWorld();
+  });
+}
+
+function renderAIDMWorld() {
+  const worldBox = document.getElementById("aidm-world");
+  if (!worldBox) return;
+  const w = state.aidm.world;
+  worldBox.innerHTML = `
+    <strong>Tension:</strong> ${w.tension}<br>
+    <strong>Last Scene:</strong> ${w.lastScene}<br>
+    <strong>NPCs:</strong> ${w.npcs.join(", ") || "None"}<br>
+    <strong>Flags:</strong> ${w.flags.join(", ") || "None"}
+  `;
 }
