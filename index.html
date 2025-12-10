@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>D&D Control Center</title>
+  <title>D&D Control Center + Solo & AI DM</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -20,6 +20,8 @@
       <button class="tab-button" data-tab="dice">Dice Roller</button>
       <button class="tab-button" data-tab="initiative">Initiative</button>
       <button class="tab-button" data-tab="notes">Notes & World</button>
+      <button class="tab-button" data-tab="solo">Solo Mode</button>
+      <button class="tab-button" data-tab="aidm">AI DM</button>
       <button class="tab-button" data-tab="settings">Settings</button>
     </nav>
 
@@ -149,6 +151,64 @@
         </div>
         <div class="notes-footer">
           <span class="muted">All notes automatically save to this browser.</span>
+        </div>
+      </section>
+
+      <!-- SOLO MODE TAB -->
+      <section class="tab-content" id="tab-solo">
+        <h2>Solo Mode</h2>
+
+        <div class="section-box">
+          <h3>Oracle</h3>
+          <label class="field">
+            <span>Your question</span>
+            <input type="text" id="oracle-question" placeholder="Will the guard let me pass?" />
+          </label>
+          <button id="oracle-roll-btn" class="btn btn-primary">Ask the Oracle</button>
+          <div id="oracle-result" class="dice-result-main" style="margin-top:8px;">Ask something...</div>
+        </div>
+
+        <div class="section-box">
+          <h3>NPC Generator</h3>
+          <button id="npc-generate-btn" class="btn btn-secondary">Generate NPC</button>
+          <div id="npc-result" class="dice-result-detail" style="margin-top:8px;"></div>
+        </div>
+
+        <div class="section-box">
+          <h3>Scene Prompt</h3>
+          <button id="scene-generate-btn" class="btn btn-secondary">Generate Scene</button>
+          <div id="scene-result" class="dice-result-detail" style="margin-top:8px;"></div>
+        </div>
+
+        <div class="section-box">
+          <h3>Chaos Meter</h3>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button id="chaos-down" class="btn btn-ghost">-</button>
+            <span id="chaos-value" style="font-size:18px;font-weight:600;">5</span>
+            <button id="chaos-up" class="btn btn-ghost">+</button>
+          </div>
+          <p class="muted">Higher chaos = more extreme oracle answers.</p>
+        </div>
+      </section>
+
+      <!-- AI DM TAB -->
+      <section class="tab-content" id="tab-aidm">
+        <h2>AI Dungeon Master</h2>
+
+        <div class="section-box">
+          <h3>Your Action</h3>
+          <textarea id="aidm-input" class="notes-textarea" placeholder="What do you do?"></textarea>
+          <button id="aidm-submit" class="btn btn-primary" style="margin-top:8px;">Continue Story</button>
+        </div>
+
+        <div class="section-box">
+          <h3>DM Response</h3>
+          <div id="aidm-output" class="dice-result-detail">Waiting for your move...</div>
+        </div>
+
+        <div class="section-box">
+          <h3>World State</h3>
+          <div id="aidm-world" class="dice-result-detail"></div>
         </div>
       </section>
 
